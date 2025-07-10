@@ -12,6 +12,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('beranda');
   const router = useRouter();
+  const [showAll, setShowAll] = useState(false);
+
 
   useEffect(() => {
     fetch("/api/products")
@@ -270,58 +272,80 @@ export default function Home() {
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">KUMPULAN UMKM</h2>
           <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-            Berikut daftar UMKM kreatif yang tergabung bersama kami
+            Berikut daftar UMKM yang tergabung bersama kami
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {loading ? (
-            [...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-xl overflow-hidden animate-pulse">
-                <div className="h-40 sm:h-48 bg-gray-300"></div>
-                <div className="p-4 sm:p-6 space-y-3">
-                  <div className="h-5 bg-gray-300 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-300 rounded w-full"></div>
-                  <div className="h-3 bg-gray-300 rounded w-2/3"></div>
-                </div>
+        {/* STATE: showAll dan visibleProducts */}
+        {(() => {
+          const visibleProducts = showAll ? products : products.slice(0, 9);
+
+          return (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                {loading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-2xl shadow-xl overflow-hidden animate-pulse">
+                      <div className="h-40 sm:h-48 bg-gray-300"></div>
+                      <div className="p-4 sm:p-6 space-y-3">
+                        <div className="h-5 bg-gray-300 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-300 rounded w-full"></div>
+                        <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : visibleProducts.length > 0 ? (
+                  visibleProducts.map((product) => (
+                    <div key={product._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                      <div className="relative">
+                        <img
+                          src={product.gambar}
+                          alt={product.nama}
+                          className="w-full h-40 sm:h-48 object-cover"
+                          onError={(e) => (e.target.src = "")}
+                        />
+                      </div>
+                      <div className="p-4 sm:p-6">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{product.nama}</h3>
+                        <p className="text-gray-600 mb-3 text-sm sm:text-base">{product.deskripsi}</p>
+                        <p className="text-sm sm:text-base text-gray-600 mb-3">Alamat: {product.alamat}</p>
+
+                        {product.info && (
+                          <button
+                            onClick={() => handleInfoClick(product.info)}
+                            className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Hubungi/Kunjungi
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">Belum ada data UMKM</h3>
+                    <p className="text-sm sm:text-base text-gray-500">Silakan cek kembali nanti</p>
+                  </div>
+                )}
               </div>
-            ))
-          ) : products.length > 0 ? (
-            products.map((product) => (
-              <div key={product._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="relative">
-                  <img
-                    src={product.gambar}
-                    alt={product.nama}
-                    className="w-full h-40 sm:h-48 object-cover"
-                    onError={(e) => (e.target.src = "")}
-                  />
+
+              {/* TOMBOL LIHAT SEMUA */}
+              {!showAll && products.length > 9 && (
+                <div className="text-center mt-10">
+                  <button
+                    onClick={() => setShowAll(true)}
+                    className="bg-amber-600 text-white px-6 py-3 rounded-full font-medium hover:bg-amber-700 transition"
+                  >
+                    Lihat Semua UMKM
+                  </button>
                 </div>
-                <div className="p-4 sm:p-6">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{product.nama}</h3>
-                  <p className="text-gray-600 mb-3 text-sm sm:text-base">{product.deskripsi}</p>
-                  <p className="text-sm sm:text-base text-gray-600 mb-3">Alamat: {product.alamat}</p>
-                  
-                  {product.info && (
-                    <button
-                      onClick={() => handleInfoClick(product.info)}
-                      className="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Hubungi/Kunjungi
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">Belum ada data UMKM</h3>
-              <p className="text-sm sm:text-base text-gray-500">Silakan cek kembali nanti</p>
-            </div>
-          )}
-        </div>
+              )}
+            </>
+          );
+        })()}
       </section>
+
 
       {/* Kontak */}
       <section id="kontak" className="bg-gradient-to-r from-amber-600 to-orange-600 text-white py-12 sm:py-16">

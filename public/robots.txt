@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://azahbucket.umkmkremsel.shop
+Host: https://umkmkremsel.shop
 
 # Sitemaps
-Sitemap: https://azahbucket.umkmkremsel.shop/sitemap.xml
+Sitemap: https://umkmkremsel.shop/sitemap.xml

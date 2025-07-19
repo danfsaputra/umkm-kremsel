@@ -30,6 +30,11 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/admin.js"
     ],
+    "/beritaadmin": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/beritaadmin.js"
+    ],
     "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",

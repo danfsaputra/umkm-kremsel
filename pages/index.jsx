@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Phone, MapPin, Menu, X, ExternalLink } from "lucide-react";
+import { Phone, MapPin, Menu, X, ExternalLink, Calendar, Share2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -8,12 +8,15 @@ import "swiper/css/pagination";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [beritas, setBeritas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [beritasLoading, setBeritasLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('beranda');
   const router = useRouter();
   const [showAll, setShowAll] = useState(false);
-
+  const [showAllBeritas, setShowAllBeritas] = useState(false);
+  const [selectedBerita, setSelectedBerita] = useState(null);
 
   useEffect(() => {
     fetch("/api/products")
@@ -29,6 +32,19 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    fetch("/api/beritas")
+      .then((res) => res.json())
+      .then((data) => {
+        setBeritas(data);
+        setBeritasLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching beritas:", err);
+        setBeritasLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setMenuOpen(false);
@@ -36,7 +52,7 @@ export default function Home() {
     };
 
     const handleScroll = () => {
-      const sections = ['beranda', 'umkm', 'kontak'];
+      const sections = ['beranda', 'umkm', 'berita', 'kontak'];
       const scrollPosition = window.scrollY + 100;
 
       for (const section of sections) {
@@ -96,9 +112,39 @@ export default function Home() {
     }
   };
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+  };
+
+  const shareBerita = async (berita) => {
+    const shareData = {
+      title: berita.judul,
+      text: berita.deskripsi.substring(0, 100) + '...',
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        const textToShare = `${berita.judul}\n\n${berita.deskripsi.substring(0, 100)}...\n\nBaca selengkapnya di: ${window.location.href}`;
+        await navigator.clipboard.writeText(textToShare);
+        alert('Link berita telah disalin ke clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+      // Manual fallback
+      const textToShare = `${berita.judul}\n\n${berita.deskripsi.substring(0, 100)}...\n\nBaca selengkapnya di: ${window.location.href}`;
+      prompt('Salin teks ini untuk berbagi berita:', textToShare);
+    }
+  };
+
   const navigationItems = [
     { id: 'beranda', label: 'Beranda' },
     { id: 'umkm', label: 'UMKM' },
+    { id: 'berita', label: 'Berita' },
     { id: 'kontak', label: 'Kontak' }
   ];
 
@@ -346,6 +392,164 @@ export default function Home() {
         })()}
       </section>
 
+      {/* Berita */}
+      <section id="berita" className="bg-gray-50 py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">BERITA & INFORMASI</h2>
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
+              Dapatkan informasi terbaru seputar UMKM dan perkembangan terkini
+            </p>
+          </div>
+
+          {(() => {
+            const visibleBeritas = showAllBeritas ? beritas : beritas.slice(0, 6);
+
+            return (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                  {beritasLoading ? (
+                    [...Array(3)].map((_, i) => (
+                      <div key={i} className="bg-white rounded-2xl shadow-xl overflow-hidden animate-pulse">
+                        <div className="h-40 sm:h-48 bg-gray-300"></div>
+                        <div className="p-4 sm:p-6 space-y-3">
+                          <div className="h-5 bg-gray-300 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-300 rounded w-full"></div>
+                          <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : visibleBeritas.length > 0 ? (
+                    visibleBeritas.map((berita) => (
+                      <div key={berita._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div className="relative">
+                          <img
+                            src={berita.gambar}
+                            alt={berita.judul}
+                            className="w-full h-40 sm:h-48 object-cover"
+                            onError={(e) => (e.target.src = "/placeholder-news.jpg")}
+                          />
+                        </div>
+                        <div className="p-4 sm:p-6">
+                          <div className="flex items-center gap-2 text-amber-600 text-sm mb-3">
+                            <Calendar className="w-4 h-4" />
+                            <span>{formatDate(berita.tanggal)}</span>
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-2">{berita.judul}</h3>
+                          <p className="text-gray-600 text-sm sm:text-base line-clamp-3 mb-4">{berita.deskripsi}</p>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => setSelectedBerita(berita)}
+                              className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium text-sm transition-colors"
+                            >
+                              Baca Selengkapnya
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => shareBerita(berita)}
+                              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm transition-colors"
+                              title="Bagikan berita"
+                            >
+                              <Share2 className="w-4 h-4" />
+                              Bagikan
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">Belum ada berita</h3>
+                      <p className="text-sm sm:text-base text-gray-500">Silakan cek kembali nanti</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* TOMBOL LIHAT SEMUA BERITA */}
+                {!showAllBeritas && beritas.length > 6 && (
+                  <div className="text-center mt-10">
+                    <button
+                      onClick={() => setShowAllBeritas(true)}
+                      className="bg-amber-600 text-white px-6 py-3 rounded-full font-medium hover:bg-amber-700 transition"
+                    >
+                      Lihat Semua Berita
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      </section>
+
+      {/* Modal untuk Detail Berita */}
+      {selectedBerita && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header Modal */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-800">Detail Berita</h2>
+              <button
+                onClick={() => setSelectedBerita(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Content Modal */}
+            <div className="p-6">
+              {/* Gambar */}
+              <div className="mb-6">
+                <img
+                  src={selectedBerita.gambar}
+                  alt={selectedBerita.judul}
+                  className="w-full h-64 sm:h-80 object-cover rounded-xl"
+                  onError={(e) => (e.target.src = "/placeholder-news.jpg")}
+                />
+              </div>
+              
+              {/* Tanggal */}
+              <div className="flex items-center gap-2 text-amber-600 text-sm mb-4">
+                <Calendar className="w-4 h-4" />
+                <span>{formatDate(selectedBerita.tanggal)}</span>
+              </div>
+              
+              {/* Judul */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
+                {selectedBerita.judul}
+              </h1>
+              
+              {/* Deskripsi Lengkap */}
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {selectedBerita.deskripsi}
+                </p>
+              </div>
+              
+              {/* Footer Modal */}
+              <div className="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
+                <button
+                  onClick={() => shareBerita(selectedBerita)}
+                  className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Bagikan
+                </button>
+                <button
+                  onClick={() => setSelectedBerita(null)}
+                  className="bg-amber-600 text-white px-6 py-3 rounded-full font-medium hover:bg-amber-700 transition-colors"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Kontak */}
       <section id="kontak" className="bg-gradient-to-r from-amber-600 to-orange-600 text-white py-12 sm:py-16">

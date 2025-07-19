@@ -44,6 +44,26 @@ export default function Home() {
       });
   }, []);
 
+  // NEW: Handle akses langsung dari URL yang dibagikan
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const beritaId = urlParams.get('berita');
+    
+    if (beritaId && beritas.length > 0) {
+      const foundBerita = beritas.find(b => b._id === beritaId);
+      if (foundBerita) {
+        setSelectedBerita(foundBerita);
+        // Scroll ke section berita setelah modal terbuka
+        setTimeout(() => {
+          scrollToSection('berita');
+        }, 500);
+        
+        // Bersihkan URL setelah modal dibuka (opsional)
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [beritas]);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -117,11 +137,15 @@ export default function Home() {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
 
+  // UPDATED: Enhanced shareBerita function with specific news URL
   const shareBerita = async (berita) => {
+    // Buat URL khusus untuk berita ini menggunakan query parameter
+    const newsUrl = `${window.location.origin}?berita=${berita._id}`;
+    
     const shareData = {
       title: berita.judul,
       text: berita.deskripsi.substring(0, 100) + '...',
-      url: window.location.href
+      url: newsUrl // Gunakan URL berita spesifik
     };
 
     try {
@@ -129,14 +153,14 @@ export default function Home() {
         await navigator.share(shareData);
       } else {
         // Fallback: copy to clipboard
-        const textToShare = `${berita.judul}\n\n${berita.deskripsi.substring(0, 100)}...\n\nBaca selengkapnya di: ${window.location.href}`;
+        const textToShare = `${berita.judul}\n\n${berita.deskripsi.substring(0, 100)}...\n\nBaca selengkapnya di: ${newsUrl}`;
         await navigator.clipboard.writeText(textToShare);
         alert('Link berita telah disalin ke clipboard!');
       }
     } catch (err) {
       console.error('Error sharing:', err);
       // Manual fallback
-      const textToShare = `${berita.judul}\n\n${berita.deskripsi.substring(0, 100)}...\n\nBaca selengkapnya di: ${window.location.href}`;
+      const textToShare = `${berita.judul}\n\n${berita.deskripsi.substring(0, 100)}...\n\nBaca selengkapnya di: ${newsUrl}`;
       prompt('Salin teks ini untuk berbagi berita:', textToShare);
     }
   };

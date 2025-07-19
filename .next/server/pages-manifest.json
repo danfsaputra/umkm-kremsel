@@ -2,9 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/beritaadmin": "pages/beritaadmin.js",
-  "/admin": "pages/admin.js",
-  "/login": "pages/login.js",
-  "/api/products": "pages/api/products.js",
-  "/api/beritas": "pages/api/beritas.js"
+  "/": "pages/index.js",
+  "/api/beritas": "pages/api/beritas.js",
+  "/api/products": "pages/api/products.js"
 }

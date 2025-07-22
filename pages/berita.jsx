@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Calendar, Share2, X } from "lucide-react";
 import Head from "next/head";
+import UserHeader from "../pages/components/UserHeader";
 
 // Format tanggal
 const formatDate = (dateString) => {
@@ -80,27 +81,8 @@ export default function Berita({ beritas, currentBerita }) {
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
-        <header className="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full overflow-hidden">
-                <img
-                  src="/surabaya.jpg"
-                  alt="Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">
-                  BERITA KREMBANGAN SELATAN
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Informasi terkini seputar UMKM
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
+        
+        <UserHeader />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">

@@ -2,8 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
   "/berita": "pages/berita.js",
   "/api/products": "pages/api/products.js",
-  "/api/beritas": "pages/api/beritas.js"
+  "/api/beritas": "pages/api/beritas.js",
+  "/": "pages/index.js"
 }

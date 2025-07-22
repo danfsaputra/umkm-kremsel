@@ -1,3 +1,4 @@
+import  AdminHeader from"../pages/components/AdminHeader";
 import React, { useEffect, useState } from "react";
 import {
   getProducts,
@@ -115,19 +116,8 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <header className="bg-white shadow sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full overflow-hidden">
-              <img src="/surabaya.jpg" alt="Logo" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">KUMPULAN UMKM KREMBANGAN SELATAN</h1>
-              <p className="text-sm text-gray-600">Produk Lokal asli krembangan selatan</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      
+      <AdminHeader/>
 
       <ToastContainer position="top-right" autoClose={3000} />
 

@@ -17,7 +17,7 @@ export default function LoginPage() {
       localStorage.setItem("isLoggedIn", "true");
       setSuccessMessage("Login berhasil. Mengarahkan ke dashboard...");
       setTimeout(() => {
-        router.push("/admin");
+        router.push("/umkmadmin");
       }, 1500);
     } else {
       setErrorMessage("Username atau password salah");

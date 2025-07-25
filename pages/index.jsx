@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Phone, MapPin, ExternalLink, Calendar, Share2 } from "lucide-react"; 
+import { Phone, MapPin, ExternalLink, Calendar, Share2, X } from "lucide-react"; 
 import { useRouter } from "next/router";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
